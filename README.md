@@ -41,6 +41,53 @@ Reset database `SYS` and `SYSTEM` passwords:
 docker exec <container name|id> resetPassword <your password>
 ```
 
+# yyildirim's settings, follow this steps
+
+```shell
+docker run -d -p 1521:1521 \          
+  -e ORACLE_PASSWORD=oracle \
+  -e APP_USER=yyildirim \
+  -e APP_USER_PASSWORD=yyildirim \
+  gvenzl/oracle-xe:18-slim
+```
+edit $ORACLE_HOME/network/admin/tnsnames.ora
+```
+XE =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = XE)
+    )
+  )
+
+XEPDB1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = XEPDB1)
+    )
+  )
+```
+```shell
+docker exec -ti $container_id /bin/bash
+sqlplus -s / as sysdba
+```
+```sql
+ALTER SESSION SET CONTAINER=XEPDB1;
+GRANT ALL PRIVILEGES TO yyildirim;
+quit
+```
+Now you can connect the oracle database using yyildirim user;
+```bash
+sqlplus -S "yyildirim/yyildirim@//localhost/XEPDB1"
+```
+Test:
+```sql
+CREATE USER flipr IDENTIFIED BY whatever;
+```
+
 # Users of these images
 
 We are proud of the following users of these images:
